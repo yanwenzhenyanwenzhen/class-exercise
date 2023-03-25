@@ -1,0 +1,89 @@
+package com.example.myapplication;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
+
+public class SecondActivity extends AppCompatActivity {
+    private Button btn_SendBack;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_second);
+        btn_SendBack = (Button) findViewById(R.id.btn_sendback);
+        btn_SendBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = getIntent();
+                String number = intent.getStringExtra("No");
+                String school = intent.getStringExtra("School");
+                Intent intent2 = new Intent();
+                intent2.putExtra("BackInfo", number + ":" + school);
+                setResult(Activity.RESULT_OK, intent2);
+                finish();
+                //Toast.makeText(SecondActivity.this, number + school, Toast.LENGTH_SHORT);
+
+            }
+        });
+
+    }
+}
+
+
+
+package com.example.myapplication;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+public class MainActivity extends AppCompatActivity {
+    private EditText m_et;
+    private Button m_btn;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ActivityResultLauncher<Intent> intentActivityResultLauncher =
+        registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getData() != null && result.getResultCode() == RESULT_OK) {
+                            String backInfo = result.getData().getStringExtra("BackInfo");
+                            Toast.makeText(MainActivity.this, backInfo, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        m_et = (EditText) findViewById(R.id.et_no);
+        m_btn = (Button) findViewById(R.id.btn_next);
+        m_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String str_no = m_et.getText().toString();
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, SecondActivity.class);
+                intent.putExtra("No", str_no);
+                intent.putExtra("School", "信息科学与技术学院");
+                //startActivity(intent);
+                //startActivityForResult(intent, 1);
+                intentActivityResultLauncher.launch(intent);
+
+            }
+        });
+    }
+}
